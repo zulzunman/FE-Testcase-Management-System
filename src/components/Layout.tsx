@@ -2,21 +2,22 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
 
-const navItems = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/projects', label: 'Projects', end: false },
-  { to: '/test-cases', label: 'Test Cases', end: false },
-  { to: '/reports', label: 'Reports', end: false },
-];
-
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = user?.role === 'admin';
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
+
+  const navItems = [
+    { to: '/', label: 'Dashboard', end: true },
+    { to: '/projects', label: 'Projects', end: false },
+    { to: '/test-cases', label: 'Test Cases', end: false },
+    { to: '/reports', label: 'Reports', end: false },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,6 +42,34 @@ export default function Layout() {
                   {item.label}
                 </NavLink>
               ))}
+              {isAdmin && (
+                <>
+                  <NavLink
+                    to="/admin/users"
+                    className={({ isActive }) =>
+                      `rounded px-3 py-1.5 text-sm transition ${
+                        isActive
+                          ? 'bg-slate-700 text-white'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`
+                    }
+                  >
+                    Users
+                  </NavLink>
+                  <NavLink
+                    to="/admin/roles"
+                    className={({ isActive }) =>
+                      `rounded px-3 py-1.5 text-sm transition ${
+                        isActive
+                          ? 'bg-slate-700 text-white'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`
+                    }
+                  >
+                    Roles
+                  </NavLink>
+                </>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">

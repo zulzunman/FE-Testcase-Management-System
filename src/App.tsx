@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import RolesPage from './pages/admin/RolesPage';
+import UsersPage from './pages/admin/UsersPage';
 import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="/projects" element={<ProjectListPage />} />
             <Route path="/projects/:id" element={<ProjectDetailPage />} />
             <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/admin/users" element={<UsersPage />} />
+            <Route path="/admin/roles" element={<RolesPage />} />
             <Route path="/test-cases" element={<TestCaseListPage />} />
             <Route path="/test-cases/new" element={<TestCaseFormPage />} />
             <Route path="/test-cases/:id" element={<TestCaseDetailPage />} />
