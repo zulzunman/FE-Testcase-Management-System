@@ -82,16 +82,3 @@ npm run build
 ```bash
 npm run preview
 ```
-
-## Halaman yang Tersedia (Fase 0–1)
-
-- `/login` — login dengan email & password (JWT)
-- `/` — Dashboard (statistik project/module/feature)
-- `/projects` — daftar & buat project
-- `/projects/:id` — detail project, CRUD module & feature
-
-Akses tulis dibatasi per role: Admin & QA Lead dapat membuat/mengubah; Developer & Product Manager read-only.
-
-## Status Pengerjaan
-
-Fase 0–1 selesai (foundation UI, auth, project/module/feature). Lihat dokumentasi internal untuk detail progres.
