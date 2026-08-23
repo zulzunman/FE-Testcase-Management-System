@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProjectListPage from './pages/ProjectListPage';
+import ReportsPage from './pages/ReportsPage';
 import TestCaseDetailPage from './pages/testcases/TestCaseDetailPage';
 import TestCaseExecutePage from './pages/testcases/TestCaseExecutePage';
 import TestCaseFormPage from './pages/testcases/TestCaseFormPage';
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/projects" element={<ProjectListPage />} />
             <Route path="/projects/:id" element={<ProjectDetailPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/test-cases" element={<TestCaseListPage />} />
             <Route path="/test-cases/new" element={<TestCaseFormPage />} />
             <Route path="/test-cases/:id" element={<TestCaseDetailPage />} />
