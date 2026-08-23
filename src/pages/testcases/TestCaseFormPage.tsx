@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type DragEvent, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { extractError } from '../../api/client';
@@ -47,6 +47,8 @@ export default function TestCaseFormPage() {
   const [assignee, setAssignee] = useState('');
   const [tags, setTags] = useState('');
   const [steps, setSteps] = useState<StepRow[]>([{ ...EMPTY_STEP }]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -119,6 +121,36 @@ export default function TestCaseFormPage() {
     setSteps((s) => (s.length <= 1 ? s : s.filter((_, i) => i !== index)));
   const updateStep = (index: number, field: keyof StepRow, value: string) =>
     setSteps((s) => s.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
+  const moveStep = (from: number, to: number) => {
+    if (from === to || from < 0 || from >= steps.length || to < 0 || to >= steps.length) return;
+    setSteps((s) => {
+      const next = [...s];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  };
+
+  const handleDragStart = (index: number, e: DragEvent) => {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+  const handleDragOver = (index: number, e: DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) setDragOverIndex(index);
+  };
+  const handleDrop = (index: number, e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex !== null && dragIndex !== index) moveStep(dragIndex, index);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
 
   const buildPayload = (): TestCasePayload => ({
     project: Number(projectId),
@@ -350,7 +382,25 @@ export default function TestCaseFormPage() {
           </div>
           <div className="space-y-2">
             {steps.map((step, i) => (
-              <div key={i} className="flex gap-2">
+              <div
+                key={i}
+                onDragOver={(e) => handleDragOver(i, e)}
+                onDrop={(e) => handleDrop(i, e)}
+                className={`flex gap-2 rounded ${
+                  dragIndex === i ? 'opacity-50' : dragOverIndex === i ? 'ring-2 ring-slate-400' : ''
+                }`}
+              >
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={(e) => handleDragStart(i, e)}
+                  onDragEnd={handleDragEnd}
+                  aria-label={`Reorder step ${i + 1}`}
+                  title="Drag to reorder"
+                  className="cursor-grab rounded border border-slate-300 px-2 text-sm text-slate-600 hover:bg-slate-50 active:cursor-grabbing"
+                >
+                  ≡
+                </button>
                 <span className="flex w-8 items-center justify-center rounded bg-slate-100 text-sm font-medium text-slate-500">
                   {i + 1}
                 </span>
