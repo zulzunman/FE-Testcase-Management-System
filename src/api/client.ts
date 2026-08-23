@@ -96,6 +96,9 @@ api.interceptors.response.use(
 export function extractError(error: unknown, fallback = 'Something went wrong.'): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data as Record<string, unknown> | undefined;
+    if (error.response?.status === 413) {
+      return 'File size exceeds the maximum limit';
+    }
     if (data) {
       if (typeof data.detail === 'string') return data.detail;
       for (const value of Object.values(data)) {

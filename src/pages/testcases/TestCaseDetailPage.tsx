@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { extractError } from '../../api/client';
+import { fetchExecutions, type TestExecution } from '../../api/test-executions';
 import {
   deleteTestCase,
   duplicateTestCase,
@@ -40,6 +41,16 @@ export default function TestCaseDetailPage() {
   const [tc, setTc] = useState<TestCase | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [executions, setExecutions] = useState<TestExecution[]>([]);
+  const [executionsLoading, setExecutionsLoading] = useState(false);
+
+  const loadExecutions = () => {
+    setExecutionsLoading(true);
+    fetchExecutions(Number(id), { page_size: 20 })
+      .then((data) => setExecutions(data.results))
+      .catch(() => setExecutions([]))
+      .finally(() => setExecutionsLoading(false));
+  };
 
   useEffect(() => {
     let active = true;
@@ -56,6 +67,11 @@ export default function TestCaseDetailPage() {
     return () => {
       active = false;
     };
+  }, [id]);
+
+  useEffect(() => {
+    loadExecutions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleDuplicate = async () => {
@@ -107,6 +123,12 @@ export default function TestCaseDetailPage() {
         </div>
         {canWrite && (
           <div className="flex gap-2">
+            <Link
+              to={`/test-cases/${tc.id}/execute`}
+              className="rounded bg-green-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-600"
+            >
+              Execute
+            </Link>
             <Link
               to={`/test-cases/${tc.id}/edit`}
               className="rounded bg-slate-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-600"
@@ -225,6 +247,76 @@ export default function TestCaseDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Execution History */}
+      <section className="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 px-4 py-3">
+          <h2 className="font-medium text-slate-900">Execution History</h2>
+        </div>
+        {executionsLoading ? (
+          <p className="px-4 py-6 text-center text-sm text-slate-500">Loading…</p>
+        ) : executions.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm text-slate-500">
+            No executions yet. Click "Execute" to run this test case.
+          </p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {executions.map((ex) => (
+              <li key={ex.id} className="px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`rounded px-2 py-0.5 text-xs font-medium ${
+                        ex.result === 'pass'
+                          ? 'bg-green-100 text-green-700'
+                          : ex.result === 'fail'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                      }`}
+                    >
+                      {humanize(ex.result)}
+                    </span>
+                    <span className="text-sm text-slate-700">{ex.executor_name || 'Unknown'}</span>
+                  </div>
+                  <span className="text-xs text-slate-400">
+                    {new Date(ex.execution_date).toLocaleString()}
+                  </span>
+                </div>
+                {(ex.actual_result || ex.notes) && (
+                  <div className="mt-2 space-y-1 text-sm text-slate-600">
+                    {ex.actual_result && (
+                      <p>
+                        <span className="font-medium text-slate-500">Actual:</span>{' '}
+                        {ex.actual_result}
+                      </p>
+                    )}
+                    {ex.notes && (
+                      <p>
+                        <span className="font-medium text-slate-500">Notes:</span> {ex.notes}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {ex.attachments.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {ex.attachments.map((a) => (
+                      <a
+                        key={a.id}
+                        href={a.url ?? '#'}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded bg-slate-100 px-2 py-1 text-xs text-slate-600 hover:bg-slate-200"
+                      >
+                        📎 Evidence #{a.id}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
