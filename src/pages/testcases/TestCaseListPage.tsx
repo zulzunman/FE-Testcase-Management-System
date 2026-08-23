@@ -329,7 +329,11 @@ export default function TestCaseListPage() {
                             ? 'bg-yellow-100 text-yellow-700'
                             : tc.status === 'deprecated'
                               ? 'bg-slate-200 text-slate-500'
-                              : 'bg-slate-100 text-slate-600'
+                              : tc.status === 'ready'
+                                ? 'bg-blue-100 text-blue-700'
+                                : tc.status === 'in_progress'
+                                  ? 'bg-indigo-100 text-indigo-700'
+                                  : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {statusLabel(tc.status)}
